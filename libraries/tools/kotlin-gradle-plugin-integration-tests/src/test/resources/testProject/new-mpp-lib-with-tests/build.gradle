@@ -23,12 +23,17 @@ kotlin {
     targets {
     	fromPreset(presets.jvm, 'jvmWithoutJava')
         fromPreset(presets.jvmWithJava, 'jvmWithJava')
-        fromPreset(presets.js, 'js')
 		fromPreset(presets.macosX64, 'macos64')
 		fromPreset(presets.linuxX64, 'linux64')
 		fromPreset(presets.mingwX64, 'mingw64')
     }
-    sourceSets {
+
+	js {
+		browser()
+		nodejs()
+	}
+
+	sourceSets {
         commonTest {
         	dependencies {
         		implementation 'org.jetbrains.kotlin:kotlin-test-common'
@@ -57,4 +62,13 @@ kotlin {
 			dependsOn nativeMain
 		}
     }
+}
+
+gradle.taskGraph.whenReady {
+	tasks.jsBrowserTest.reports.junitXml.enabled = true
+	tasks.jsNodeTest.reports.junitXml.enabled = true
+	tasks.jvmWithoutJavaTest.reports.junitXml.enabled = true
+	tasks.linux64Test.reports.junitXml.enabled = true
+	tasks.macos64Test.reports.junitXml.enabled = true
+	tasks.mingw64Test.reports.junitXml.enabled = true
 }
