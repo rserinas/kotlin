@@ -77,7 +77,7 @@ class FlattenStringConcatenationLowering(val context: CommonBackendContext) : Fi
         // is a member function of kotlin.String (with FqName kotlin.String.plus)
         private val PARENT_NAMES = setOf(
             KotlinBuiltIns.BUILT_INS_PACKAGE_FQ_NAME,
-            KotlinBuiltIns.BUILT_INS_PACKAGE_FQ_NAME.child(Name.identifier("String"))
+            KotlinBuiltIns.FQ_NAMES.string.toSafe()
         )
         private val PLUS_NAME = Name.identifier("plus")
 
