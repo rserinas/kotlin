@@ -29,7 +29,7 @@ open class AbstractUpdateKotlinCopyrightTest : KotlinLightCodeInsightFixtureTest
         }
 
         var commentsNumber = 0
-        val comments = collectComments(UpdateKotlinCopyright.getCommentSearchRange(myFixture.file))
+        val comments = UpdateKotlinCopyright.getCommentSearchRange(myFixture.file)
         for (comment in comments) {
             when (comment.text) {
                 "/* PRESENT */" -> {
@@ -48,31 +48,4 @@ open class AbstractUpdateKotlinCopyrightTest : KotlinLightCodeInsightFixtureTest
     }
 
     override fun getTestDataPath() = File(PluginTestCaseBase.getTestDataPathBase(), "/copyright").path + File.separator
-
-    companion object {
-        private fun collectComments(range: UpdateKotlinCopyright.PsiRange): List<PsiComment> {
-            val comments = mutableListOf<PsiComment>()
-            val first = range.first
-            val last = range.last
-            if (first == null) return listOf()
-            collectComments(first, last, comments)
-            return comments
-        }
-
-        // Copied from UpdatePsiFileCopyright.collectComments()
-        private fun collectComments(first: PsiElement, last: PsiElement?, comments: MutableList<PsiComment>) {
-            if (first === last && first is PsiComment) {
-                comments.add(first)
-                return
-            }
-            var elem: PsiElement? = first
-            while (elem !== last && elem != null) {
-                if (elem is PsiComment) {
-                    comments.add(elem)
-                }
-
-                elem = elem.nextSibling
-            }
-        }
-    }
 }

@@ -18,15 +18,20 @@ package org.jetbrains.kotlin.idea.copyright;
 
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiComment;
-import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.SyntaxTraverser;
+import com.intellij.util.containers.ContainerUtil;
+import com.intellij.util.containers.TreeTraversal;
 import com.maddyhome.idea.copyright.CopyrightProfile;
 import com.maddyhome.idea.copyright.psi.UpdatePsiFileCopyright;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
+import org.jetbrains.kotlin.psi.KtDeclaration;
+
+import java.util.List;
 
 public class UpdateKotlinCopyright extends UpdatePsiFileCopyright {
     UpdateKotlinCopyright(Project project, Module module, VirtualFile root, CopyrightProfile copyrightProfile) {
@@ -35,39 +40,24 @@ public class UpdateKotlinCopyright extends UpdatePsiFileCopyright {
 
     @Override
     protected void scanFile() {
-        PsiRange commentSearchRange = getCommentSearchRange(getFile());
-        PsiElement first = commentSearchRange.first;
-        PsiElement last = commentSearchRange.last;
+        List<PsiComment> comments = getCommentSearchRange(getFile());
+        if (comments.isEmpty()) return;
 
-        if (first != null) {
-            checkComments(first, last, true);
-        }
+        checkComments(ContainerUtil.getLastItem(comments), true, comments);
     }
 
-    public static class PsiRange {
-        public final @Nullable PsiElement first;
-        public final @Nullable PsiElement last;
-
-        public PsiRange(@Nullable PsiElement first, @Nullable PsiElement second) {
-            this.first = first;
-            this.last = second;
-        }
-    }
-
-    public static @NotNull PsiRange getCommentSearchRange(@NotNull PsiFile psiFile) {
-        PsiElement first = psiFile.getFirstChild();
-        PsiElement last = first;
-        PsiElement next = first;
-        while (next != null) {
-            if (next instanceof PsiComment || next instanceof PsiWhiteSpace || next.getText().isEmpty()) {
-                next = next.getNextSibling();
-            }
-            else {
-                break;
-            }
-            last = next;
-        }
-
-        return new PsiRange(first, last);
+    public static @NotNull
+    List<PsiComment> getCommentSearchRange(@NotNull PsiFile psiFile) {
+        return SyntaxTraverser.psiTraverser(psiFile)
+                .withTraversal(TreeTraversal.LEAVES_DFS)
+                .traverse()
+                .takeWhile(
+                        element ->
+                                (element instanceof PsiComment && !(element.getParent() instanceof KtDeclaration)) ||
+                                element instanceof PsiWhiteSpace ||
+                                element.getText().isEmpty()
+                )
+                .filter(PsiComment.class)
+                .toList();
     }
 }
