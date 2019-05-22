@@ -583,9 +583,9 @@ tasks {
             ":idea:idea-gradle-native:test",
             ":idea:idea-maven:test",
             ":j2k:test",
-            ":idea:jvm-debugger:jvm-debugger-core",
-            ":idea:jvm-debugger:jvm-debugger-evaluation",
-            ":idea:jvm-debugger:jvm-debugger-sequences",
+            ":idea:jvm-debugger:jvm-debugger-core:test",
+            ":idea:jvm-debugger:jvm-debugger-evaluation:test",
+            ":idea:jvm-debugger:jvm-debugger-sequences:test",
             ":idea:jvm-debugger:eval4j:test"
         )
     }
